@@ -32,7 +32,7 @@ const Component = ({ storage }: Props) => {
   useEffect(() => {
     const init = async () => {
       const { cleanup } = await storage.syncComponent({
-        `component/${key}.json`: setData,
+        [`component/${key}.json`]: setData,
       });
       return cleanup;
     };

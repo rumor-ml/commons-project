@@ -1,0 +1,171 @@
+{
+  "activities": {
+    "development": {
+      "name": "Software Development",
+      "priority": 1,
+      "description": "Programming and software development work"
+    },
+    "guitar": {
+      "name": "Guitar Practice",
+      "priority": 2,
+      "description": "Guitar practice and music study"
+    },
+    "house_development": {
+      "name": "House Development",
+      "priority": 3,
+      "description": "Home improvement and development projects"
+    },
+    "chores": {
+      "name": "Chores",
+      "priority": 4,
+      "tasks": [
+        "Finances",
+        "Dishes",
+        "Vacuum",
+        "Take out trash",
+        "Water plants",
+        "Dust surfaces"
+      ]
+    }
+  },
+  "schedules": [
+    {
+      "name": "Base Schedule (Tue/Fri/Weekend) *Note: Exercise timing needs review",
+      "timeBlocks": [
+        { "type": "meal", "name": "Breakfast", "start": "08:15", "duration": 30 },
+        { "type": "exercise", "name": "Exercise", "start": "10:00", "duration": 60 },
+        { 
+          "type": "focus", 
+          "name": "Focus 1", 
+          "start": "12:00", 
+          "duration": 90,
+          "possibleActivities": ["development", "guitar", "house_development", "chores"]
+        },
+        { "type": "meal", "name": "Lunch", "start": "13:30", "duration": 30 },
+        { 
+          "type": "focus", 
+          "name": "Focus 2", 
+          "start": "15:00", 
+          "duration": 90,
+          "possibleActivities": ["development", "guitar", "house_development", "chores"]
+        },
+        { 
+          "type": "focus", 
+          "name": "Focus 3", 
+          "start": "16:45", 
+          "duration": 90,
+          "possibleActivities": ["development", "guitar", "house_development", "chores"]
+        },
+        { "type": "meal", "name": "Dinner", "start": "19:00", "duration": 30 }
+      ],
+      "markers": [
+        { "type": "wakeup", "time": "07:45", "name": "Wake Up" },
+        { "type": "snack", "time": "11:15", "name": "Post-Exercise Snack" },
+        { "type": "sleep", "time": "23:45", "name": "Sleep" }
+      ],
+      "transitions": [
+        { "start": "07:45", "duration": 30, "type": "transition" },
+        { "start": "08:45", "duration": 60, "type": "recovery" },
+        { "start": "11:00", "duration": 60, "type": "recovery" },
+        { "start": "14:00", "duration": 60, "type": "recovery" },
+        { "start": "16:15", "duration": 30, "type": "transition" },
+        { "start": "18:15", "duration": 30, "type": "transition" },
+        { "start": "19:30", "duration": 60, "type": "recovery" }
+      ]
+    },
+    {
+      "name": "Monday (Exercise 12:15) *Note: Early exercise gap needs review",
+      "timeBlocks": [
+        { "type": "meal", "name": "Breakfast", "start": "08:15", "duration": 30 },
+        { 
+          "type": "focus", 
+          "name": "Focus 1", 
+          "start": "09:45", 
+          "duration": 90,
+          "possibleActivities": ["development", "guitar", "house_development", "chores"]
+        },
+        { "type": "exercise", "name": "Exercise", "start": "12:15", "duration": 60 },
+        { "type": "meal", "name": "Lunch", "start": "13:30", "duration": 30 },
+        { "type": "focus", "name": "Focus 2", "start": "15:00", "duration": 90 },
+        { "type": "focus", "name": "Focus 3", "start": "16:45", "duration": 90 },
+        { "type": "meal", "name": "Dinner", "start": "19:00", "duration": 30 }
+      ],
+      "markers": [
+        { "type": "wakeup", "time": "07:45", "name": "Wake Up" },
+        { "type": "snack", "time": "10:15", "name": "Pre-Exercise Snack" },
+        { "type": "sleep", "time": "23:45", "name": "Sleep" }
+      ],
+      "transitions": [
+        { "start": "07:45", "duration": 30, "type": "transition" },
+        { "start": "08:45", "duration": 60, "type": "recovery" },
+        { "start": "11:15", "duration": 60, "type": "recovery" },
+        { "start": "13:15", "duration": 15, "type": "recovery" },
+        { "start": "14:00", "duration": 60, "type": "recovery" },
+        { "start": "16:15", "duration": 30, "type": "transition" },
+        { "start": "18:15", "duration": 30, "type": "transition" },
+        { "start": "19:30", "duration": 60, "type": "recovery" }
+      ]
+    },
+    {
+      "name": "Wednesday (Exercise 18:00)",
+      "timeBlocks": [
+        { "type": "meal", "name": "Breakfast", "start": "08:15", "duration": 30 },
+        { "type": "focus", "name": "Focus 1", "start": "09:45", "duration": 90 },
+        { 
+          "type": "focus", 
+          "name": "Focus 2", 
+          "start": "12:00", 
+          "duration": 90,
+          "possibleActivities": ["development", "guitar", "house_development", "chores"]
+        },
+        { "type": "meal", "name": "Lunch", "start": "13:30", "duration": 30 },
+        { "type": "focus", "name": "Focus 3", "start": "15:00", "duration": 90 },
+        { "type": "exercise", "name": "Exercise", "start": "18:00", "duration": 60 },
+        { "type": "meal", "name": "Dinner", "start": "19:00", "duration": 30 }
+      ],
+      "markers": [
+        { "type": "wakeup", "time": "07:45", "name": "Wake Up" },
+        { "type": "snack", "time": "16:00", "name": "Pre-Exercise Snack" },
+        { "type": "sleep", "time": "23:45", "name": "Sleep" }
+      ],
+      "transitions": [
+        { "start": "07:45", "duration": 30, "type": "transition" },
+        { "start": "08:45", "duration": 60, "type": "recovery" },
+        { "start": "11:15", "duration": 45, "type": "transition" },
+        { "start": "14:00", "duration": 60, "type": "recovery" },
+        { "start": "16:30", "duration": 90, "type": "transition" },
+        { "start": "19:30", "duration": 60, "type": "recovery" }
+      ]
+    },
+    {
+      "name": "Thursday (Exercise 10:00) *Note: Early exercise gap needs review",
+      "timeBlocks": [
+        { "type": "meal", "name": "Breakfast", "start": "08:15", "duration": 30 },
+        { "type": "exercise", "name": "Exercise", "start": "10:00", "duration": 60 },
+        { "type": "focus", "name": "Focus 1", "start": "12:00", "duration": 90 },
+        { "type": "meal", "name": "Lunch", "start": "13:30", "duration": 30 },
+        { "type": "focus", "name": "Focus 2", "start": "15:00", "duration": 90 },
+        { "type": "focus", "name": "Focus 3", "start": "16:45", "duration": 90 },
+        { "type": "meal", "name": "Dinner", "start": "19:00", "duration": 30 }
+      ],
+      "markers": [
+        { "type": "wakeup", "time": "07:45", "name": "Wake Up" },
+        { "type": "snack", "time": "11:15", "name": "Post-Exercise Snack" }
+      ],
+      "transitions": [
+        { "start": "07:45", "duration": 30, "type": "transition" },
+        { "start": "08:45", "duration": 60, "type": "recovery" },
+        { "start": "11:00", "duration": 60, "type": "recovery" },
+        { "start": "14:00", "duration": 60, "type": "recovery" },
+        { "start": "16:15", "duration": 30, "type": "transition" },
+        { "start": "18:15", "duration": 30, "type": "transition" },
+        { "start": "19:30", "duration": 60, "type": "recovery" }
+      ]
+    }
+  ],
+  "timeRange": {
+    "start": "07:45",
+    "end": "23:00",
+    "majorTicks": ["08:45", "09:00", "10:30", "12:00", "13:30", "15:00", "17:00", "19:00", "21:00", "23:00"]
+  }
+}

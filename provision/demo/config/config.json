@@ -1,0 +1,26 @@
+{
+  "crawler": {
+    "seeds": [
+      {
+        "url": "https://guides.library.jhu.edu/dataservices",
+        "meta": {
+          "source": "Site Policy"
+        }
+      },
+      {
+        "url": "https://ictr.johnshopkins.edu/service/informatics",
+        "meta": {
+          "source": "Site Policy"
+        }
+      },
+      {
+        "url": "https://pm.jh.edu",
+        "meta": {
+          "source": "Site Policy"
+        }
+      }
+    ],
+    "maxDepth": 3,
+    "downloadsPerSecond": 0.05
+  }
+}

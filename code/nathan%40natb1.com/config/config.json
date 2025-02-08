@@ -1,0 +1,12 @@
+{
+  "crawler": {
+    "seeds": [
+      {
+        "url": "https://docs.anthropic.com/en/api/messages-streaming",
+        "depth": 1
+      }
+    ],
+    "max_depth": 3,
+    "downloads_per_second": 0.05
+  }
+}
