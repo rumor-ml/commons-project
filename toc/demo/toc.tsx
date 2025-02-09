@@ -33,7 +33,7 @@ const Component = ({ storage }: Props) => {
       meta.forEach((item: Meta) => {
         const parsed = parsePath(item.path);
         if (!parsed) {
-          console.warning("parsePath; !parsed", item.path)
+          console.warn("parsePath; !parsed", item.path)
           return;
         }
         
