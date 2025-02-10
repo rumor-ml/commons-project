@@ -1,9 +1,9 @@
 export default [
   {
     name: "Tracker renders current activity",
-    component: "tracker",
+    component: "component/tracker.tsx",
     testData: {
-      schedule: {
+      "component/schedule.json": {
         schedules: [{
           id: "test1",
           name: "Test Schedule",
@@ -38,9 +38,9 @@ export default [
   },
   {
     name: "Tracker form controls render",
-    component: "tracker",
+    component: "component/tracker.tsx",
     testData: {
-      schedule: {
+      "component/schedule.json": {
         schedules: [{
           timeBlocks: [],
           markers: []
@@ -76,10 +76,10 @@ export default [
   },
   {
     name: "Tracker can log activity",
-    component: "tracker",
+    component: "component/tracker.tsx",
     testData: {
-      tracker: [],
-      schedule: {
+      "component/tracker.json": [],
+      "component/schedule.json": {
         schedules: [{
           timeBlocks: [
             { type: "focus", start: "09:00", duration: 90, name: "Deep Work" },
@@ -101,7 +101,7 @@ export default [
     test: async (context) => {
       context.log("Testing activity logging");
 
-      const testKey = 'tracker';
+      const testKey = 'component/tracker.json';
       
       // Wait for activity select to be populated
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -146,7 +146,6 @@ export default [
       // Submit form
       const submitButton = await context.waitForElement('[data-testid="submit-log"]');
       submitButton.click();
-      context.log("Submitted form");
 
       // Wait for storage update with verification
       let storedLogs = [];
@@ -155,13 +154,13 @@ export default [
       
       while (attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 100));
-        storedLogs = context.storage.getItem(testKey);
-        if (storedLogs.length > 0) break;
+        storedLogs = await context.storage.getItem(testKey);
+        if (storedLogs.content.length > 0) break;
         attempts++;
       }
 
       if (attempts >= maxAttempts) {
-        console.error('Final storage state:', context.storage.getItem(testKey));
+        console.error('Final storage state:', storedLogs);
         throw new Error('Timed out waiting for storage update');
       }
 

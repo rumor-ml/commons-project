@@ -12,15 +12,21 @@
            Ribbit! Track your routine!
 */
 
+// Imports injected by component.js
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { defaultColor } from 'util';
 import _ from 'lodash';
 
-const storageKeys = {
-  logs: "tracker",
-  schedule: "schedule",
-}
+const colors = {
+  meal: '#86efac',
+  exercise: '#f472b6',
+  focus: '#60a5fa',
+  wakeup: '#854d0e',
+  snack: '#d97706'
+};
 
 type TrackerEvent = {
   type: 'log-added' | 'log-updated' | 'log-deleted';
@@ -41,13 +47,17 @@ type TrackerEvent = {
 // Shared helper functions
 const timeStringToDate = (timeStr: string, currentTime: Date = new Date()) => {
   const [hours, minutes] = timeStr.split(':').map(Number);
-  const date = new Date(currentTime);
+  const date = new Date(currentTime.getTime());
   date.setHours(hours, minutes, 0, 0);
+  // If the resulting time is earlier than current time, it might be for tomorrow
+  if (date < currentTime && hours < currentTime.getHours()) {
+    date.setDate(date.getDate() + 1);
+  }
   return date;
 };
 
-const getCurrentDaySchedule = (data: TrackerProps['data'], currentTime: Date = new Date()) => {
-  if (!data?.schedule?.schedules?.length) {
+const getCurrentDaySchedule = (data: any, currentTime: Date = new Date()) => {
+  if (!data?.schedules?.length) {
     return {
       name: 'Default',
       timeBlocks: [],
@@ -56,14 +66,14 @@ const getCurrentDaySchedule = (data: TrackerProps['data'], currentTime: Date = n
     };
   }
   const dayOfWeek = currentTime.getDay();
-  if (dayOfWeek === 1) return data.schedule.schedules[1] || data.schedule.schedules[0]; // Monday
-  if (dayOfWeek === 3) return data.schedule.schedules[2] || data.schedule.schedules[0]; // Wednesday
-  if (dayOfWeek === 4) return data.schedule.schedules[3] || data.schedule.schedules[0]; // Thursday
-  return data.schedule.schedules[0]; // Base schedule for other days
+  if (dayOfWeek === 1) return data.schedules[1] || data.schedules[0]; // Monday
+  if (dayOfWeek === 3) return data.schedules[2] || data.schedules[0]; // Wednesday
+  if (dayOfWeek === 4) return data.schedules[3] || data.schedules[0]; // Thursday
+  return data.schedules[0]; // Base schedule for other days
 };
 
 const getCurrentBlock = (schedule: any, currentTime: Date = new Date()) => {
-  if (!schedule) return null;
+  if (!schedule?.timeBlocks) return null;
   
   return schedule.timeBlocks.find(block => {
     const startTime = timeStringToDate(block.start, currentTime);
@@ -77,17 +87,6 @@ const CurrentActivity = ({ data, onBlockChange }: TrackerProps & { onBlockChange
   const [currentBlock, setCurrentBlock] = React.useState(null);
   const [currentMarker, setCurrentMarker] = React.useState(null);
   
-  // Block type colors
-  const blockColors = {
-    meal: '#86efac',
-    exercise: '#f472b6',
-    focus: '#60a5fa',
-    wakeup: '#854d0e',
-    snack: '#d97706'
-  };
-
-  
-
   const getEndTime = (block) => {
     const startTime = timeStringToDate(block.start);
     const endTime = new Date(startTime.getTime() + block.duration * 60000);
@@ -119,7 +118,23 @@ const CurrentActivity = ({ data, onBlockChange }: TrackerProps & { onBlockChange
   };
 
   React.useEffect(() => {
+// Initial setup
+if (data) {
+  const now = new Date();
+  const schedule = getCurrentDaySchedule(data);
+  const block = getCurrentBlock(schedule);
+  const marker = schedule?.markers?.find(m => {
+    const markerTime = timeStringToDate(m.time);
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60000);
+    return markerTime >= fiveMinutesAgo && markerTime <= now;
+  });
+  
+  setCurrentBlock(block);
+  setCurrentMarker(marker);
+  
+}
 
+// Timer setup
     const timer = setInterval(() => {
       const now = new Date();
       setCurrentTime(now);
@@ -135,12 +150,12 @@ const CurrentActivity = ({ data, onBlockChange }: TrackerProps & { onBlockChange
           JSON.stringify(marker) !== JSON.stringify(currentMarker)) {
         setCurrentBlock(block);
         setCurrentMarker(marker);
-        onBlockChange(block);
+        
       }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [data]);
+  }, [data]); // This effect runs when data changes or component mounts
 
   if (!data) return null;
 
@@ -180,7 +195,7 @@ const CurrentActivity = ({ data, onBlockChange }: TrackerProps & { onBlockChange
             <div 
               className="w-3 h-3 rounded-full" 
               style={{ 
-                backgroundColor: currentBlock?.type ? blockColors[currentBlock.type] : '#94a3b8'
+                backgroundColor: currentBlock?.type ? colors[currentBlock?.type] : defaultColor(currentBlock?.type, colors)
               }} 
             />
             <div className="font-medium component" data-testid="current-activity">Current Activity</div>
@@ -204,7 +219,7 @@ const CurrentActivity = ({ data, onBlockChange }: TrackerProps & { onBlockChange
                 className="h-full rounded-full transition-all duration-1000"
                 style={{ 
                   width: `${getProgressPercentage()}%`,
-                  backgroundColor: blockColors[currentBlock.type]
+                  backgroundColor: colors[currentBlock.type] || defaultColor(currentBlock.type, colors)
                 }}
               />
             </div>
@@ -280,7 +295,7 @@ const CurrentActivity = ({ data, onBlockChange }: TrackerProps & { onBlockChange
                         x={timeToX(marker.time)} 
                         y="40" 
                         fontSize="10" 
-                        fill={blockColors[marker.type] || markerColors[marker.type]}
+                        fill={colors[marker.type] || defaultColor(marker.type, colors)}
                         textAnchor="middle"
                       >
                         ↓ {marker.name}
@@ -290,7 +305,7 @@ const CurrentActivity = ({ data, onBlockChange }: TrackerProps & { onBlockChange
                         y1="45"
                         x2={timeToX(marker.time)}
                         y2="50"
-                        stroke={blockColors[marker.type] || markerColors[marker.type]}
+                        stroke={colors[marker.type] || defaultColor(marker.type, colors)}
                         strokeWidth="2"
                       />
                     </g>
@@ -304,7 +319,7 @@ const CurrentActivity = ({ data, onBlockChange }: TrackerProps & { onBlockChange
                         y="50"
                         width={(block.duration / 915) * 500}
                         height="25"
-                        fill={blockColors[block.type]}
+                        fill={colors[block.type] || defaultColor(block.type, colors)}
                         rx="4"
                         className={`transition-opacity duration-200 ${
                           currentBlock?.start === block.start ? 'stroke-2 stroke-gray-400' : ''
@@ -350,17 +365,6 @@ const DaySchedule = ({ schedule, currentTime }) => {
     const startHours = 7.75;
     const totalMinutes = (hours - startHours) * 60 + minutes;
     return 50 + (totalMinutes / 915) * 500; // Scaled down from 900 to 500
-  };
-
-  const blockColors = {
-    meal: '#86efac',
-    exercise: '#f472b6',
-    focus: '#60a5fa'
-  };
-
-  const markerColors = {
-    wakeup: '#854d0e',
-    snack: '#d97706'
   };
 
   // Calculate current time position
@@ -440,7 +444,7 @@ const DaySchedule = ({ schedule, currentTime }) => {
                 x={timeToX(marker.time)} 
                 y="55" 
                 fontSize="10" 
-                fill={markerColors[marker.type]}
+                fill={colors[marker.type] || defaultColor(marker.type, colors)}
                 textAnchor="middle"
               >
                 ↓ {marker.name}
@@ -450,7 +454,7 @@ const DaySchedule = ({ schedule, currentTime }) => {
                 y1="60"
                 x2={timeToX(marker.time)}
                 y2="70"
-                stroke={markerColors[marker.type]}
+                stroke={colors[marker.type] || defaultColor(marker.type, colors)}
                 strokeWidth="2"
               />
             </g>
@@ -464,7 +468,7 @@ const DaySchedule = ({ schedule, currentTime }) => {
                 y="70"
                 width={(block.duration / 915) * 500}
                 height="30"
-                fill={blockColors[block.type]}
+                fill={colors[block.type] || defaultColor(block.type, colors)}
                 rx="4"
                 className="transition-opacity duration-200"
               />
@@ -501,54 +505,6 @@ const DaySchedule = ({ schedule, currentTime }) => {
   );
 };
 
-const Button = ({ className = "", disabled = false, children, ...props }) => {
-  return (
-    <button
-      className={`inline-flex items-center justify-center whitespace-nowrap rounded-md 
-        text-sm font-medium transition-colors focus-visible:outline-none 
-        focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 
-        disabled:pointer-events-none disabled:opacity-50 
-        bg-gray-900 text-gray-50 hover:bg-gray-900/90 
-        h-10 px-4 py-2 ${className}`}
-      disabled={disabled}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
-
-const Input = ({ type = "text", className = "", ...props }) => {
-  if (type === "range") {
-    return (
-      <input
-        type="range"
-        className={`w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer 
-          [&::-webkit-slider-thumb]:appearance-none 
-          [&::-webkit-slider-thumb]:w-4 
-          [&::-webkit-slider-thumb]:h-4 
-          [&::-webkit-slider-thumb]:bg-blue-500 
-          [&::-webkit-slider-thumb]:rounded-full
-          [&::-webkit-slider-thumb]:cursor-pointer
-          ${className}`}
-        {...props}
-      />
-    );
-  }
-  
-  return (
-    <input
-      type={type}
-      className={`flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm 
-        ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium 
-        placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 
-        focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed 
-        disabled:opacity-50 ${className}`}
-      {...props}
-    />
-  );
-};
-
 interface TrackerProps {
   storage: StorageAdapter;
   onEvent: (event: any) => void;
@@ -561,11 +517,102 @@ const Tracker = ({ storage }: TrackerProps) => {
   const [activityTiming, setActivityTiming] = useState('after');
   const [energyLevel, setEnergyLevel] = useState(5);
   const [editingLog, setEditingLog] = useState(null);
+  const [isManualSelection, setIsManualSelection] = useState(false);
 
-  useEffect(syncComponent(storage, {
-    'schedule': setScheduleData,
-    'tracker': setLogs,
-  }), [storage]);
+  useEffect(() => {
+    const init = async () => {
+      const { cleanup } = await storage.syncComponent({
+        'schedule.json': setScheduleData,
+        'tracker.json': setLogs,
+      });
+      return cleanup;
+    };
+
+    init().catch(error => {
+      console.error('Failed to initialize tracker:', error);
+    });
+  }, [storage]);
+
+  // Initialize current activity when schedule data loads
+  useEffect(() => {
+    if (!scheduleData || isManualSelection) return; // Skip if there's a manual selection
+    
+    const now = new Date();
+    const schedule = getCurrentDaySchedule(scheduleData);
+    
+    if (!schedule) {
+      return;
+    }
+    
+    const currentBlock = getCurrentBlock(schedule);
+    const marker = getCurrentMarker(schedule);
+    
+    let newActivity = '';
+    let newTiming = 'after';
+    
+    if (marker) {
+      newActivity = marker.type;
+      newTiming = 'after';
+    } else if (currentBlock) {
+      newActivity = currentBlock.type;
+      newTiming = 'after';
+    } else {
+      // If no current block/marker, look for the next upcoming one
+      const findNextEvent = () => {
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+
+        // Get all upcoming blocks and markers for today
+        const upcomingBlocks = schedule.timeBlocks
+          .map(block => {
+            const [hours, minutes] = block.start.split(':').map(Number);
+            const startMinutes = hours * 60 + minutes;
+            return { ...block, startMinutes, isBlock: true };
+          })
+          .filter(block => block.startMinutes > currentTime);
+
+        const upcomingMarkers = (schedule.markers || [])
+          .map(marker => {
+            const [hours, minutes] = marker.time.split(':').map(Number);
+            const startMinutes = hours * 60 + minutes;
+            return { ...marker, startMinutes, isMarker: true };
+          })
+          .filter(marker => marker.startMinutes > currentTime);
+
+        // Sort all upcoming events by time
+        const allEvents = [...upcomingBlocks, ...upcomingMarkers]
+          .sort((a, b) => {
+            // If times are equal, prioritize blocks over markers
+            if (a.startMinutes === b.startMinutes) {
+              return a.isBlock ? -1 : 1;
+            }
+            return a.startMinutes - b.startMinutes;
+          });
+
+        return allEvents[0];
+      };
+
+      const nextEvent = findNextEvent();
+
+      if (nextEvent) {
+        if (nextEvent.isMarker) {
+          // It's a marker
+          newActivity = nextEvent.type;
+          newTiming = 'before';
+        } else if (nextEvent.isBlock) {
+          // It's a block
+          newActivity = nextEvent.type;
+          newTiming = 'before';
+        }
+      }
+      
+      // Only update state if we have a new activity to set
+      if (newActivity) {
+        setCurrentActivity(newActivity);
+        setActivityTiming(newTiming);
+      }
+    }
+  }, [scheduleData, isManualSelection]); // Depend on scheduleData and manual selection changes
 
   const getCurrentMarker = (schedule: any) => {
     if (!schedule?.markers) return null;
@@ -579,34 +626,52 @@ const Tracker = ({ storage }: TrackerProps) => {
   };
 
   const handleBlockChange = (block: any) => {
+    if (isManualSelection) return; // Skip automatic updates if user made a manual selection
+    
     const schedule = getCurrentDaySchedule(scheduleData);
-    const marker = getCurrentMarker(schedule);
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
 
-    if (marker) {
-      // Marker events are instantaneous, so they're always "after"
-      setCurrentActivity(marker.type);
-      setActivityTiming('after');
-    } else if (block?.type) {
+    // Get all upcoming blocks and markers for today
+    const upcomingBlocks = schedule.timeBlocks
+      .map(block => {
+        const [hours, minutes] = block.start.split(':').map(Number);
+        const startMinutes = hours * 60 + minutes;
+        return { ...block, startMinutes, isBlock: true };
+      })
+      .filter(block => block.startMinutes > currentTime);
+
+    const upcomingMarkers = (schedule.markers || [])
+      .map(marker => {
+        const [hours, minutes] = marker.time.split(':').map(Number);
+        const startMinutes = hours * 60 + minutes;
+        return { ...marker, startMinutes, isMarker: true };
+      })
+      .filter(marker => marker.startMinutes > currentTime);
+
+    // Sort all upcoming events by time
+    const allEvents = [...upcomingBlocks, ...upcomingMarkers]
+      .sort((a, b) => {
+        // If times are equal, prioritize blocks over markers
+        if (a.startMinutes === b.startMinutes) {
+          return a.isBlock ? -1 : 1;
+        }
+        return a.startMinutes - b.startMinutes;
+      });
+
+    const nextEvent = allEvents[0];
+
+    if (block?.type) {
+      // We're in a current block
       setCurrentActivity(block.type);
-      // For blocks, we default to "after" during the block
       setActivityTiming('after');
-    } else {
-      // If we're between blocks, look for the next block or marker
-      const now = new Date();
-      const nextBlock = schedule?.timeBlocks.find(b => {
-        const startTime = timeStringToDate(b.start);
-        return startTime > now;
-      });
-      const nextMarker = schedule?.markers?.find(m => {
-        const markerTime = timeStringToDate(m.time);
-        return markerTime > now;
-      });
-
-      if (nextMarker && (!nextBlock || timeStringToDate(nextMarker.time) < timeStringToDate(nextBlock.start))) {
-        setCurrentActivity(nextMarker.type);
+    } else if (nextEvent) {
+      // We're between blocks, use the next event
+      if (nextEvent.isBlock) {
+        setCurrentActivity(nextEvent.type);
         setActivityTiming('before');
-      } else if (nextBlock) {
-        setCurrentActivity(nextBlock.type);
+      } else if (nextEvent.isMarker) {
+        setCurrentActivity(nextEvent.type);
         setActivityTiming('before');
       }
     }
@@ -634,7 +699,6 @@ const Tracker = ({ storage }: TrackerProps) => {
 
 
   const addLog = () => {
-    
     const newLog = {
       timestamp: new Date().toISOString(),
       activity: currentActivity,
@@ -643,38 +707,21 @@ const Tracker = ({ storage }: TrackerProps) => {
       focus: parseInt(focusLevel.toString()),
     };
 
-    if (!logs) {
-      let retries = 0;
-      const maxRetries = 3;
-      const retryInterval = 1000; // 1 second
-      const waitForLogs = () => {
-        if (logs) return;
-        if (retries < maxRetries) {
-          retries++;
-          setTimeout(waitForLogs, retryInterval);
-        } else {
-          console.warn('Cannot update logs. Logs failed to load after multiple retries.');
-          return;
-        }
-      };
-      waitForLogs();
-      return;
-    }
+    // Initialize logs array if it doesn't exist yet
+    const currentLogs = logs || [];
     
     let updatedLogs;
     if (editingLog) {
-      updatedLogs = logs.map(log => 
+      updatedLogs = currentLogs.map(log => 
         log.timestamp === editingLog.timestamp ? newLog : log
       );
-
     } else {
-      updatedLogs = [newLog, ...logs];
-
+      updatedLogs = [newLog, ...currentLogs];
     }
 
     setLogs(updatedLogs);
     try {
-      storage.setItem(storageKeys.logs, updatedLogs);
+      storage.setItem("component/tracker.json", updatedLogs);
     } catch (error) {
       console.error('Failed to update storage:', error);
       throw error;
@@ -686,6 +733,7 @@ const Tracker = ({ storage }: TrackerProps) => {
     setActivityTiming('after');
     setEnergyLevel(5);
     setFocusLevel(5);
+    setIsManualSelection(false); // Reset the manual selection flag
   };
 
   const deleteLog = async (timestamp) => {
@@ -693,7 +741,7 @@ const Tracker = ({ storage }: TrackerProps) => {
       setLogs(prevLogs => {
         const logToDelete = prevLogs.find(log => log.timestamp === timestamp);
         const updatedLogs = prevLogs.filter(log => log.timestamp !== timestamp);
-        storage.setItem(storageKeys.logs, JSON.stringify(updatedLogs));
+        storage.setItem("component/tracker.json", JSON.stringify(updatedLogs));
         return updatedLogs;
       });
     } catch (error) {
@@ -713,7 +761,10 @@ const Tracker = ({ storage }: TrackerProps) => {
   return (
     <div className="p-4 bg-gray-50">
       <div className="max-w-xl mx-auto space-y-4">
-        <CurrentActivity data={{ schedule: scheduleData }} onBlockChange={handleBlockChange} />
+        <CurrentActivity 
+          data={scheduleData} 
+          onBlockChange={(block) => !isManualSelection && handleBlockChange(block)} 
+        />
         
         <details className="bg-white rounded-lg shadow">
           <summary className="px-6 py-3 font-medium cursor-pointer hover:bg-gray-50" data-testid="log-form-toggle">
@@ -726,9 +777,12 @@ const Tracker = ({ storage }: TrackerProps) => {
                     <label className="block mb-2">Activity</label>
                     <div className="flex gap-2">
                       <select 
-                        className="flex-grow p-2 border rounded"
-                        value={currentActivity}
-                        onChange={(e) => setCurrentActivity(e.target.value)}
+                          className="flex-grow p-2 border rounded"
+                          value={currentActivity}
+                          onChange={(e) => {
+                            setCurrentActivity(e.target.value);
+                            setIsManualSelection(true);
+                          }}
                         data-testid="activity-select"
                       >
                         <option value="">Select Activity</option>

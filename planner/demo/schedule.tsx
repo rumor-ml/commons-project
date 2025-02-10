@@ -9,12 +9,20 @@ interface ScheduleProps {
 const Schedule = ({ storage }: ScheduleProps) => {
   const [data, setData] = useState<any>(null);
 
-  useEffect(syncComponent(storage, {
-    'schedule': setData,
-  }), [storage]);
+  useEffect(() => {
+    const init = async () => {
+      const { cleanup } = await storage.syncComponent({
+        'schedule.json': setData,
+      });
+      return cleanup;
+    };
+
+    init().catch(error => {
+      console.error('Failed to initialize tracker:', error);
+    });
+  }, [storage]);
   
   if (!data?.schedules?.[0]?.timeBlocks) {
-    console.warn('Schedule rendered without required data');
     return <div>Loading schedule data...</div>;
   }
 
@@ -116,10 +124,6 @@ const Schedule = ({ storage }: ScheduleProps) => {
                 />
               );
             })}
-
-            {/* Sleep indicator */}
-            <text x="955" y="50" fontSize="11" fill="#475569">↓ Sleep</text>
-            <line x1="950" y1="40" x2="950" y2="65" stroke="#475569" strokeWidth="2"/>
 
             {/* Event markers with improved visibility */}
             {schedule.markers?.map((marker, i) => (

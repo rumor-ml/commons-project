@@ -1,9 +1,9 @@
 export default [
   {
     name: "Schedule renders title",
-    component: "schedule",
+    component: "component/schedule.tsx",
     testData: {
-      schedule: {
+      "component/schedule.json": {
         schedules: [{
           name: "Test Schedule",
           timeBlocks: [
@@ -37,9 +37,9 @@ export default [
   },
   {
     name: "Schedule renders all time blocks",
-    component: "schedule",
+    component: "component/schedule.tsx",
     testData: {
-      schedule: {
+      "component/schedule.json": {
         schedules: [{
           name: "Test Schedule",
           timeBlocks: [
@@ -87,9 +87,9 @@ export default [
   },
   {
     name: "Schedule renders legend",
-    component: "schedule",
+    component: "component/schedule.tsx",
     testData: {
-      schedule: {
+      "component/schedule.json": {
         schedules: [{
           name: "Test Schedule",
           timeBlocks: [
